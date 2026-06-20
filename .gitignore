@@ -12,3 +12,15 @@ databricks_agents_venv/
 .mcp.json
 opencode.json
 .specify/
+__pycache__/
+*.pyc
+.venv/
+venv/
+dist/
+*.egg-info/
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
+.vscode/
+.idea/
