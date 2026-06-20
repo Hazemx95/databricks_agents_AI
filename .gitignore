@@ -1,2 +1,14 @@
 
 databricks_agents_venv/
+.env 
+*.env
+.databrickscfg
+.agents/
+.ai-dev-kit/
+.claude/
+.codex/
+.opencode/
+.specify/
+.mcp.json
+opencode.json
+.specify/
