@@ -251,6 +251,7 @@ All scripts must work in:
 - `new_value` STRING
 - `change_percent` DECIMAL
 - `context_json` STRING (JSON format)
+- `watched_column` STRING (NOT NULL)
 - `commit_version` LONG (NOT NULL)
 - `commit_timestamp` TIMESTAMP (NOT NULL)
 - `created_at` TIMESTAMP (NOT NULL)

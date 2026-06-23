@@ -1,22 +1,34 @@
-# Databricks notebook source
-# Phase 000 - Project Bootstrap
+from pathlib import Path
+import sys
 
-SOURCE_TABLE = "databricks_arrow_cata.bronz.sales_info"
-MONITORING_SCHEMA = "databricks_arrow_cata.monitoring"
+PROJECT_ROOT = Path.cwd()
+if not (PROJECT_ROOT / "src").exists():
+    PROJECT_ROOT = PROJECT_ROOT.parent
 
-RULE_ID = "SALES_PRICE_CHANGE_001"
-BUSINESS_KEY_COLUMNS = ["sls_ord_num"]
-CONTEXT_COLUMNS = ["sls_prd_key", "sls_cust_id", "sls_quantity", "sls_sales"]
-WATCHED_COLUMN = "sls_price"
+SRC_DIR = PROJECT_ROOT / "src"
+if str(SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(SRC_DIR))
 
-MEDIUM_THRESHOLD_PERCENT = 5.0
-HIGH_THRESHOLD_PERCENT = 10.0
+from cdf_agent_monitoring import config 
 
-RULES_TABLE = f"{MONITORING_SCHEMA}.agent_rules"
-EVENTS_TABLE = f"{MONITORING_SCHEMA}.change_events"
-ALERTS_TABLE = f"{MONITORING_SCHEMA}.agent_alerts"
-NOTIFICATION_LOG_TABLE = f"{MONITORING_SCHEMA}.notification_log"
-RUN_LOG_TABLE = f"{MONITORING_SCHEMA}.agent_run_log"
+SOURCE_TABLE = config.SOURCE_TABLE
+MONITORING_SCHEMA = config.MONITORING_SCHEMA
+RULE_ID = config.RULE_ID
+BUSINESS_KEY_COLUMNS = config.BUSINESS_KEY_COLUMNS
+CONTEXT_COLUMNS = config.CONTEXT_COLUMNS
+WATCHED_COLUMN = config.WATCHED_COLUMN
+MEDIUM_THRESHOLD_PERCENT = config.MEDIUM_THRESHOLD_PERCENT
+HIGH_THRESHOLD_PERCENT = config.HIGH_THRESHOLD_PERCENT
+
+SQL_DIR = PROJECT_ROOT / "sql"
+PHASE_000_SQL_FILES = [
+    "001_create_monitoring_schema.sql",
+    "002_create_agent_rules.sql",
+    "003_create_change_events.sql",
+    "004_create_agent_alerts.sql",
+    "005_create_notification_log.sql",
+    "006_create_agent_run_log.sql",
+]
 EXPECTED_MONITORING_TABLES = {
     "agent_rules",
     "change_events",
@@ -57,114 +69,8 @@ except Exception as exc:
 
 print("Creating monitoring schema and tables")
 
-run_sql("Create monitoring schema", f"CREATE SCHEMA IF NOT EXISTS {MONITORING_SCHEMA}")
-
-run_sql(
-    "Create agent_rules table",
-    f"""
-    CREATE TABLE IF NOT EXISTS {RULES_TABLE} (
-      rule_id STRING NOT NULL,
-      rule_name STRING NOT NULL,
-      catalog_name STRING NOT NULL,
-      schema_name STRING NOT NULL,
-      table_name STRING NOT NULL,
-      business_key_columns STRING NOT NULL,
-      context_columns STRING NOT NULL,
-      watched_column STRING NOT NULL,
-      condition_type STRING NOT NULL,
-      medium_threshold_percent DOUBLE NOT NULL,
-      high_threshold_percent DOUBLE NOT NULL,
-      notification_target_type STRING NOT NULL,
-      notification_target_value STRING NOT NULL,
-      is_active BOOLEAN NOT NULL,
-      created_at TIMESTAMP NOT NULL,
-      updated_at TIMESTAMP NOT NULL,
-      CONSTRAINT agent_rules_pk PRIMARY KEY (rule_id) NOT ENFORCED
-    )
-    USING DELTA
-    """,
-)
-
-run_sql(
-    "Create change_events table",
-    f"""
-    CREATE TABLE IF NOT EXISTS {EVENTS_TABLE} (
-      event_id STRING NOT NULL,
-      rule_id STRING NOT NULL,
-      event_type STRING NOT NULL,
-      source_table STRING NOT NULL,
-      business_key_json STRING NOT NULL,
-      old_value STRING,
-      new_value STRING,
-      change_percent DOUBLE,
-      context_json STRING,
-      watched_column STRING NOT NULL,
-      commit_version BIGINT NOT NULL,
-      commit_timestamp TIMESTAMP NOT NULL,
-      created_at TIMESTAMP NOT NULL,
-      CONSTRAINT change_events_pk PRIMARY KEY (event_id) NOT ENFORCED
-    )
-    USING DELTA
-    """,
-)
-
-run_sql(
-    "Create agent_alerts table",
-    f"""
-    CREATE TABLE IF NOT EXISTS {ALERTS_TABLE} (
-      alert_id STRING NOT NULL,
-      event_id STRING NOT NULL,
-      rule_id STRING NOT NULL,
-      severity STRING NOT NULL,
-      should_notify BOOLEAN NOT NULL,
-      reason STRING NOT NULL,
-      recommended_action STRING,
-      agent_type STRING NOT NULL,
-      alert_status STRING NOT NULL,
-      genie_context_json STRING,
-      created_at TIMESTAMP NOT NULL,
-      updated_at TIMESTAMP NOT NULL,
-      CONSTRAINT agent_alerts_pk PRIMARY KEY (alert_id) NOT ENFORCED
-    )
-    USING DELTA
-    """,
-)
-
-run_sql(
-    "Create notification_log table",
-    f"""
-    CREATE TABLE IF NOT EXISTS {NOTIFICATION_LOG_TABLE} (
-      notification_id STRING NOT NULL,
-      alert_id STRING NOT NULL,
-      rule_id STRING NOT NULL,
-      notification_type STRING NOT NULL,
-      subject STRING,
-      body STRING NOT NULL,
-      delivery_status STRING NOT NULL,
-      created_at TIMESTAMP NOT NULL,
-      sent_at TIMESTAMP,
-      CONSTRAINT notification_log_pk PRIMARY KEY (notification_id) NOT ENFORCED
-    )
-    USING DELTA
-    """,
-)
-
-run_sql(
-    "Create agent_run_log table",
-    f"""
-    CREATE TABLE IF NOT EXISTS {RUN_LOG_TABLE} (
-      run_id STRING NOT NULL,
-      phase STRING NOT NULL,
-      status STRING NOT NULL,
-      message STRING,
-      row_count BIGINT,
-      created_at TIMESTAMP NOT NULL,
-      completed_at TIMESTAMP,
-      CONSTRAINT agent_run_log_pk PRIMARY KEY (run_id) NOT ENFORCED
-    )
-    USING DELTA
-    """,
-)
+for sql_file in PHASE_000_SQL_FILES:
+    run_sql(sql_file, (SQL_DIR / sql_file).read_text())
 
 tables_df = run_sql("Show monitoring tables", f"SHOW TABLES IN {MONITORING_SCHEMA}")
 display(tables_df)

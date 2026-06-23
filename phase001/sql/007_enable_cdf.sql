@@ -1,3 +1,3 @@
--- This script belongs to Phase 001 and must not be executed in Phase 000.
+-- Phase 001 only. This file is intentionally outside the Phase 000 sql/ path.
 ALTER TABLE databricks_arrow_cata.bronz.sales_info
 SET TBLPROPERTIES (delta.enableChangeDataFeed = true);
