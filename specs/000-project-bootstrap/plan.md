@@ -68,7 +68,7 @@ Phase 000 bootstraps the Databricks CDF Rule-Based AI Agent Monitoring project b
 
 ✅ **Principle II: Delta Change Data Feed (CDF) Events**
 - Phase 000 validates source table is Delta format but does NOT enable CDF (Phase 001 work)
-- Plan explicitly defers CDF enablement with sql/007_enable_cdf.sql marked Phase 001 only
+- Plan explicitly defers CDF enablement with phase001/sql/007_enable_cdf.sql outside the Phase 000 execution path
 - Passes ✓
 
 ✅ **Principle III: Rule-Based Agent (No LLM in POC)**
@@ -120,8 +120,10 @@ databricks_agents_AI/
 │   ├── 003_create_change_events.sql         # change_events table (NEW)
 │   ├── 004_create_agent_alerts.sql          # agent_alerts table (NEW)
 │   ├── 005_create_notification_log.sql      # notification_log table (NEW)
-│   ├── 006_create_agent_run_log.sql         # agent_run_log table (NEW)
-│   └── 007_enable_cdf.sql                   # CDF enablement (Phase 001 only, DO NOT RUN)
+│   └── 006_create_agent_run_log.sql         # agent_run_log table (NEW)
+├── phase001/
+│   └── sql/
+│       └── 007_enable_cdf.sql               # CDF enablement (Phase 001 only)
 ├── notebooks/
 │   ├── 00_project_bootstrap.py              # Phase 000 bootstrap (NEW, MAIN)
 │   ├── 01_enable_cdf_and_validate.py        # Phase 001 placeholder (NEW, TODO)
@@ -344,6 +346,7 @@ Phase 000 establishes two data domains:
 | new_value | STRING | Y | | New column value |
 | change_percent | DECIMAL | Y | | Percentage change (if numeric) |
 | context_json | STRING | Y | | JSON object with context columns |
+| watched_column | STRING | N | UK* | Column being monitored for changes |
 | commit_version | LONG | N | UK* | Delta table version where change occurred |
 | commit_timestamp | TIMESTAMP | N | | Commit timestamp |
 | created_at | TIMESTAMP | N | | Event creation timestamp |
@@ -352,7 +355,7 @@ Phase 000 establishes two data domains:
 - PK: event_id
 - UK: (rule_id, business_key_json, watched_column, commit_version) — prevents duplicate event detection [enforced in Phase 002+ via application logic]
 
-**Lifecycle**: Append-only; one row per detected change; deduplicated by (rule_id, business_key, commit_version)
+**Lifecycle**: Append-only; one row per detected change; deduplicated by (rule_id, business_key, watched_column, commit_version)
 
 ---
 

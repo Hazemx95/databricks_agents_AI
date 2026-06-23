@@ -117,14 +117,14 @@
 
 - [X] T021 [US3] Create sql/001_create_monitoring_schema.sql (CREATE SCHEMA IF NOT EXISTS)
 - [X] T022 [US3] Create sql/002_create_agent_rules.sql with explicit PK on rule_id and all required columns (rule_id, rule_name, catalog_name, schema_name, table_name, business_key_columns, context_columns, watched_column, condition_type, medium_threshold_percent, high_threshold_percent, notification_target_type, notification_target_value, is_active, created_at, updated_at)
-- [X] T023 [P] [US3] Create sql/003_create_change_events.sql with PK on event_id and UK on (rule_id, business_key_json, commit_version)
+- [X] T023 [P] [US3] Create sql/003_create_change_events.sql with PK on event_id and UK on (rule_id, business_key_json, watched_column, commit_version)
 - [X] T024 [P] [US3] Create sql/004_create_agent_alerts.sql with PK on alert_id and UK on (event_id, rule_id)
 - [X] T025 [P] [US3] Create sql/005_create_notification_log.sql with PK on notification_id
 - [X] T026 [P] [US3] Create sql/006_create_agent_run_log.sql with PK on run_id and columns for phase, status, message, row_count, timestamps
-- [X] T027 [US3] Integrate all schema/table creation SQL into notebooks/00_project_bootstrap.py (read and execute all sql/*.sql files in order)
+- [X] T027 [US3] Integrate Phase 000 schema/table creation SQL into notebooks/00_project_bootstrap.py (read and execute 001-006 SQL files in order)
 - [X] T028 [US3] Add monitoring table creation verification to notebook (query monitoring schema and list all tables)
 - [X] T029 [US3] Add error handling for table creation in notebook (fail fast if schema creation fails or permissions insufficient)
-- [X] T030 [US3] Create sql/007_enable_cdf.sql with clear Phase 001 comment warning NOT to execute in Phase 000 (includes ALTER TABLE for delta.enableChangeDataFeed = true, but DO NOT run)
+- [X] T030 [US3] Create phase001/sql/007_enable_cdf.sql for Phase 001 only (includes ALTER TABLE for delta.enableChangeDataFeed = true, but is not in the Phase 000 SQL execution path)
 
 **Checkpoint**: User Story 3 complete — monitoring schema and tables ready for Phase 001+
 
