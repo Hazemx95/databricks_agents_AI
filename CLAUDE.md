@@ -1,5 +1,5 @@
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan:
-`specs/001-enable-cdf/plan.md` (Phase 001 — Enable and Validate Change Data Feed).
+`specs/002-cdf-event-detection/plan.md` (Phase 002 — CDF Event Detection).
 <!-- SPECKIT END -->
