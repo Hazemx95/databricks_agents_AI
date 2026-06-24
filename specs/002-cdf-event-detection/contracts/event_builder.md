@@ -38,7 +38,7 @@ Return a JSON object string mapping each business-key column to its value in `ro
 Return a JSON object string mapping each listed column to its value in `row`.
 
 - Used for `context_json` with `["sls_prd_key", "sls_cust_id", "sls_quantity", "sls_sales"]`.
-- Missing keys: handle in a defined way (either omit or serialize `null`); document the choice in the implementation and assert it in a test.
+- Missing keys MUST be included in the JSON output with value `null`; assert this in a test.
 - Output must be valid JSON parseable by `json.loads`.
 
 ## General

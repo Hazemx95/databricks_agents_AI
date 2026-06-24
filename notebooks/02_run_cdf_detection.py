@@ -1,7 +1,20 @@
 # Databricks notebook source
 # Phase 002 - Run CDF Detection
 
+from pathlib import Path
+import sys
+
 from pyspark.sql import functions as F
+
+PROJECT_ROOT = Path.cwd()
+if not (PROJECT_ROOT / "src").exists():
+    PROJECT_ROOT = PROJECT_ROOT.parent
+
+SRC_DIR = PROJECT_ROOT / "src"
+if str(SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(SRC_DIR))
+
+from cdf_agent_monitoring import event_builder
 
 SOURCE_TABLE = "databricks_arrow_cata.bronz.sales_info"
 EVENTS_TABLE = "databricks_arrow_cata.monitoring.change_events"
@@ -129,23 +142,7 @@ changed_df = paired_df.filter(~F.col("old_value_raw").eqNullSafe(F.col("new_valu
 
 business_key_struct = F.struct(*[F.col(column).cast("string").alias(column) for column in BUSINESS_KEY_COLUMNS])
 context_struct = F.struct(*[F.col(column).cast("string").alias(column) for column in CONTEXT_COLUMNS])
-old_value_number = F.expr("try_cast(old_value_raw as double)")
-new_value_number = F.expr("try_cast(new_value_raw as double)")
-
-change_percent_expr = F.when(
-    F.col("old_value_raw").isNull()
-    | F.col("new_value_raw").isNull()
-    | old_value_number.isNull()
-    | new_value_number.isNull()
-    | (old_value_number == F.lit(0.0)),
-    F.lit(None).cast("double"),
-).otherwise(
-    F.round(
-        ((new_value_number - old_value_number) / old_value_number)
-        * F.lit(100.0),
-        2,
-    )
-)
+change_percent_udf = F.udf(event_builder.calculate_change_percent, "double")
 
 events_df = changed_df.select(
     F.expr("uuid()").alias("event_id"),
@@ -155,7 +152,9 @@ events_df = changed_df.select(
     F.to_json(business_key_struct).alias("business_key_json"),
     F.col("old_value_raw").cast("string").alias("old_value"),
     F.col("new_value_raw").cast("string").alias("new_value"),
-    change_percent_expr.alias("change_percent"),
+    change_percent_udf(F.col("old_value_raw"), F.col("new_value_raw")).alias(
+        "change_percent"
+    ),
     F.to_json(context_struct).alias("context_json"),
     F.lit(WATCHED_COLUMN).alias("watched_column"),
     F.col("commit_version").cast("bigint").alias("commit_version"),

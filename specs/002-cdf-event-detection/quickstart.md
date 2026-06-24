@@ -12,9 +12,10 @@ Validation guide proving CDF→event detection works end-to-end. See [data-model
 ## 1. Unit-test the helpers (local, no Databricks)
 
 ```bash
-cd /home/hazem/databricks_agents_AI
 python -m pytest tests/test_event_builder.py -q
 ```
+
+Run from the project root.
 
 **Expected**: all tests pass, including `100→115 ⇒ 15`, `100→80 ⇒ -20`, `100→100 ⇒ 0`, `0→100 ⇒ None`, null ⇒ `None`, non-numeric ⇒ `None`.
 
