@@ -1,6 +1,7 @@
 
 databricks_agents_venv/
 .env 
+.env*
 *.env
 .databrickscfg
 .agents/
@@ -17,7 +18,9 @@ __pycache__/
 .venv/
 venv/
 dist/
+build/
 *.egg-info/
+*.log
 .DS_Store
 Thumbs.db
 *.tmp

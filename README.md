@@ -58,6 +58,15 @@ The notebook is idempotent. It uses `CREATE SCHEMA IF NOT EXISTS` and `CREATE TA
 
 The notebook enables CDF on `databricks_arrow_cata.bronz.sales_info` if needed, captures a baseline table version, applies one controlled `sls_price * 1.15` update for `sls_ord_num = 'SO43697'`, and validates that CDF returns both `update_preimage` and `update_postimage` rows. It prints a rollback SQL suggestion but does not execute rollback automatically.
 
+## Phase 003 Execution
+
+1. Sync or upload this repository to Databricks.
+2. Open `notebooks/03_setup_monitoring_rules.py` in Databricks.
+3. Attach serverless compute.
+4. Run all cells, top to bottom.
+
+The notebook ensures `databricks_arrow_cata.monitoring.agent_rules` exists, merges `SALES_PRICE_CHANGE_001`, displays the active rule, validates all configured values, and prints `SUCCESS: SALES_PRICE_CHANGE_001 is active with the expected configuration.` Re-running the notebook must keep exactly one row for that rule ID.
+
 ## Troubleshooting
 
 - If the source table cannot be described, confirm read access to `databricks_arrow_cata.bronz.sales_info`.
