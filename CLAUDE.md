@@ -1,5 +1,5 @@
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan:
-`specs/002-cdf-event-detection/plan.md` (Phase 002 — CDF Event Detection).
+`specs/003-monitoring-rules/plan.md` (Phase 003 — Monitoring Rules Table).
 <!-- SPECKIT END -->
