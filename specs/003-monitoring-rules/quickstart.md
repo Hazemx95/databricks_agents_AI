@@ -5,7 +5,7 @@ Validates that the first monitoring rule `SALES_PRICE_CHANGE_001` is stored and 
 ## Prerequisites
 
 - Databricks Free Edition, serverless compute, DEFAULT `.databrickscfg` profile (or the configured Databricks MCP server).
-- Phase 000 complete — `monitoring` schema and `agent_rules` table exist. *(Verified live: the table exists with 16 columns and currently 0 rows.)*
+- Phase 000 complete — `monitoring` schema and `agent_rules` table exist with the expected Phase 003 schema.
 
 ## Files
 

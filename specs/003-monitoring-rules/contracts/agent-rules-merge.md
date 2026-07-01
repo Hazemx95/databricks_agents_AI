@@ -7,6 +7,7 @@
 
 - Table exists (created by `sql/002_create_agent_rules.sql`, `CREATE TABLE IF NOT EXISTS`).
 - All 16 columns present as in [data-model.md](../data-model.md).
+- No pre-existing duplicate rows for `rule_id = 'SALES_PRICE_CHANGE_001'`; the notebook's pre-MERGE duplicate guard fails fast if duplicates already exist.
 
 ## Source
 
@@ -50,7 +51,7 @@ WHEN NOT MATCHED THEN INSERT (
 
 ## Postconditions / Guarantees
 
-- Exactly one row exists where `rule_id = 'SALES_PRICE_CHANGE_001'`.
+- Exactly one row exists where `rule_id = 'SALES_PRICE_CHANGE_001'`, assuming the precondition above holds; Delta does not enforce the primary key, so the notebook's pre-MERGE duplicate guard enforces this invariant.
 - That row's values equal the canonical values in [data-model.md](../data-model.md).
 - `created_at` is set once (insert); `updated_at` reflects the latest write.
 - Re-running the MERGE does not change the row count (idempotent, SC-003).

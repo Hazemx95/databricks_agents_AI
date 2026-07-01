@@ -132,29 +132,41 @@ run_sql(
 
 describe_df = run_sql("Describe agent_rules table", f"DESCRIBE TABLE {RULES_TABLE}")
 expected_columns = {
-    "rule_id",
-    "rule_name",
-    "catalog_name",
-    "schema_name",
-    "table_name",
-    "business_key_columns",
-    "context_columns",
-    "watched_column",
-    "condition_type",
-    "medium_threshold_percent",
-    "high_threshold_percent",
-    "notification_target_type",
-    "notification_target_value",
-    "is_active",
-    "created_at",
-    "updated_at",
+    "rule_id": "string",
+    "rule_name": "string",
+    "catalog_name": "string",
+    "schema_name": "string",
+    "table_name": "string",
+    "business_key_columns": "string",
+    "context_columns": "string",
+    "watched_column": "string",
+    "condition_type": "string",
+    "medium_threshold_percent": "double",
+    "high_threshold_percent": "double",
+    "notification_target_type": "string",
+    "notification_target_value": "string",
+    "is_active": "boolean",
+    "created_at": "timestamp",
+    "updated_at": "timestamp",
 }
-actual_columns = {row.col_name for row in describe_df.collect() if row.col_name in expected_columns}
-missing_columns = sorted(expected_columns - actual_columns)
+actual_columns = {
+    row.col_name: row.data_type.lower()
+    for row in describe_df.collect()
+    if row.col_name in expected_columns
+}
+missing_columns = sorted(set(expected_columns) - set(actual_columns))
 if missing_columns:
     raise RuntimeError(f"agent_rules table missing expected columns: {missing_columns}")
 
-print(f"[OK] {RULES_TABLE} exists with the expected Phase 003 columns.")
+wrong_types = {
+    column_name: {"expected": expected_type, "actual": actual_columns[column_name]}
+    for column_name, expected_type in expected_columns.items()
+    if actual_columns.get(column_name) != expected_type
+}
+if wrong_types:
+    raise RuntimeError(f"agent_rules table columns have unexpected types: {wrong_types}")
+
+print(f"[OK] {RULES_TABLE} exists with the expected Phase 003 schema.")
 
 # COMMAND ----------
 
@@ -166,6 +178,10 @@ before_count = scalar(
     """
 )
 print(f"[MERGE] {RULE_ID} rows before merge = {before_count}")
+if before_count > 1:
+    raise RuntimeError(
+        f"Refusing to merge {RULE_ID}: expected at most 1 pre-existing row, found {before_count}"
+    )
 
 run_sql(
     "Merge SALES_PRICE_CHANGE_001 into agent_rules",

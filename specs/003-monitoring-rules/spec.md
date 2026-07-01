@@ -4,7 +4,7 @@
 
 **Created**: 2026-06-24
 
-**Status**: Draft
+**Status**: Implemented
 
 **Input**: Phase 003 requirements from PLAN.md and project constitution
 
@@ -46,7 +46,7 @@ As a **data engineer**, I want to **insert the first monitoring rule into `agent
 
 1. **Given** no row exists for `SALES_PRICE_CHANGE_001`, **When** the upsert runs, **Then** a single new rule row is inserted with all configured values.
 2. **Given** a row already exists for `SALES_PRICE_CHANGE_001`, **When** the upsert runs again, **Then** no duplicate row is created; the existing row is matched on `rule_id` and updated in place.
-3. **Given** the upsert is run twice in succession, **When** counting rows for `SALES_PRICE_CHANGE_001`, **Then** the count is exactly one after both runs.
+3. **Given** the upsert is run twice, **When** counting rows for `SALES_PRICE_CHANGE_001` after the second run, **Then** the count is exactly one.
 4. **Given** the rule is inserted, **When** the row is written, **Then** `is_active` is `true` and the audit timestamps (`created_at`, `updated_at`) are populated.
 
 ---

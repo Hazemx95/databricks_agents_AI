@@ -1,4 +1,4 @@
-# Phase 1 Data Model: Monitoring Rules Table (Phase 003)
+# Phase 003 Data Model: Monitoring Rules Table (Phase 003)
 
 ## Entities
 
@@ -25,7 +25,7 @@ The single entity of this phase. Schema verified live against `information_schem
 | created_at | TIMESTAMP | `current_timestamp()` (insert only) | NOT NULL | set in MERGE |
 | updated_at | TIMESTAMP | `current_timestamp()` (insert + update) | NOT NULL | set in MERGE |
 
-**Match / dedup key**: `rule_id` (the primary key). The `MERGE ON target.rule_id = source.rule_id` guarantees at most one row per rule.
+**Match / dedup key**: `rule_id` (the primary key). The primary key is not enforced by Delta, so the notebook fails fast if pre-existing duplicate `rule_id` rows exist before running the `MERGE`.
 
 ### 2. Rule Source Row (transient working set for the MERGE)
 
@@ -40,7 +40,7 @@ A one-row source (temp view or `VALUES`) carrying the 14 business columns above 
 | Constant | Value |
 |----------|-------|
 | `RULE_NAME` | `"Sales price change monitoring"` |
-| `EVENT_TYPE` | `"SALES_PRICE_CHANGE"` |
+| `EVENT_TYPE` | `"SALES_PRICE_CHANGE"` (reserved for Phase 004; not written to the Phase 003 `agent_rules` schema) |
 | `CONDITION_TYPE` | `"percent_change"` |
 | `NOTIFICATION_TARGET_TYPE` | `"alert_table"` |
 | `NOTIFICATION_TARGET_VALUE` | `NOTIFICATION_LOG_TABLE` (= `databricks_arrow_cata.monitoring.notification_log`) |
@@ -48,7 +48,7 @@ A one-row source (temp view or `VALUES`) carrying the 14 business columns above 
 | `SOURCE_SCHEMA` | `"bronz"` |
 | `SOURCE_TABLE_NAME` | `"sales_info"` |
 
-These keep `SOURCE_TABLE == f"{SOURCE_CATALOG}.{SOURCE_SCHEMA}.{SOURCE_TABLE_NAME}"` consistent.
+These keep `SOURCE_TABLE == f"{SOURCE_CATALOG}.{SOURCE_SCHEMA}.{SOURCE_TABLE_NAME}"` consistent. `EVENT_TYPE` is a forward-looking rule-based agent constant only; the current Phase 003 schema does not include an `event_type` column.
 
 ## Validation Rules (enforced by the notebook)
 
@@ -70,6 +70,6 @@ All pass → notebook prints `SUCCESS`; any fail → `FAILED: <reasons>`.
 
 ## State / Idempotency
 
-- **First run** (current live state: 0 rows): `WHEN NOT MATCHED` → INSERT one row; `created_at = updated_at = current_timestamp()`.
+- **First run**: `WHEN NOT MATCHED` → INSERT one row; `created_at = updated_at = current_timestamp()`.
 - **Subsequent runs**: `WHEN MATCHED` → UPDATE business columns + `updated_at`; `created_at` unchanged; row count for the rule stays at exactly 1 (SC-003).
 - Source table `bronz.sales_info` is never read or modified by this phase.

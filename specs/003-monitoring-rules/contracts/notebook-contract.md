@@ -5,7 +5,7 @@ Serverless Databricks notebook. Sets up and validates the first monitoring rule.
 ## Inputs
 
 - Shared constants from `src/cdf_agent_monitoring/config.py` (notebook adds `src/` to `sys.path`, mirroring notebooks 01/02).
-- No widgets required (the rule is fixed configuration). May optionally expose none.
+- No widgets are exposed because the rule configuration is fixed.
 
 ## Behavior (ordered stages)
 

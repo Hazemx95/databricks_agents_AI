@@ -36,7 +36,7 @@ This phase **stores and validates the rule only**. No CDF read, no source mutati
 
 ## Constitution Check
 
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
+*GATE: Must pass before Phase 003 implementation. Re-check after Phase 1 design.*
 
 | Principle | Status | Notes |
 |-----------|--------|-------|
